@@ -1,0 +1,33 @@
+# cp2k v6.1 makefile  for the kirk cluster. mkl + fftw3 + libint + libxc + spglib libxsmm + plumed
+CC       = gcc
+CPP      =
+FC       = mpif90
+LD       = mpif90
+AR       = ar -r
+ 
+LIB	=  
+MKL_ROOT  = $(LIB)/MKL/2017.0.098/mkl
+MKL_LIB   = $(INTEL_MKL_ROOT)/lib/intel64
+MKL_INC   = $(INTEL_MKL_ROOT)/include
+FFTW3_ROOT      = $(LIB)/FFTW3/3.3.5
+LIBINT_ROOT     = $(LIB)/LIBINT/1.1.4-65
+PLUMED_ROOT     = $(LIB)/PLUMED/2.3.1
+OPENMPI         = $(LIBS)/OPENMPI/2.0.1
+LIBXC_ROOT      = $(LIB)/LIBXC/4.2.3
+SPGLIB_ROOT     = $(LIB)/SPGLIB/1.10.4
+LIBXSMM_ROOT    = $(LIB)/LIBXSMM/1.9
+ 
+include $(PLUMED_ROOT)/lib/plumed/src/lib/Plumed.inc
+EXTERNAL_OBJECTS=$(PLUMED_STATIC_DEPENDENCIES)
+ 
+CPPFLAGS =
+DFLAGS   = -D__parallel -D__SCALAPACK -D__FFTW3 -D__LIBINT -D__LIBINT_MAX_AM=7 -D__LIBDERIV_MAX_AM1=6 -D__PLUMED2 -D__LIBXC -D__SPGLIB -D_LIBXSMM
+FCFLAGS  = -O2 -ffast-math -funroll-loops -ftree-vectorize -mtune=native -ffree-form  $(DFLAGS) -g -I${OPENMPI}/include \
+        -I${FFTW3_ROOT}/include -I$(LIBXC_ROOT)/include -I$(SPGLIB_ROOT)/include
+LDFLAGS  = $(FCFLAGS) -I${OPENMPI}/include -L$(OPENMPI)/lib -L$(INTEL_MKL_LIB) -L${FFTW3_ROOT}/lib -L${PLUMED_ROOT}/lib
+LIBS     = -lz -ldl -lstdc++ -fopenmp -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_gf_lp64 -lmkl_sequential -lmkl_core \
+         ${FFTW3_ROOT}/lib/libfftw3.a \
+         ${LIBINT_ROOT}/lib/libderiv.a ${LIBINT_ROOT}/lib/libint.a \
+         ${LIBXC_ROOT}/lib/libxcf03.a ${LIBXC_ROOT}/lib/libxc.a \
+         ${SPGLIB_ROOT}/lib/libsymspg.a \
+         ${LIBXSMM_ROOT}/lib/libxsmm.a $(LIBXSMM_ROOT)/lib/libxsmmf.a
